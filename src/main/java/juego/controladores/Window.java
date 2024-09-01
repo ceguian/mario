@@ -1,5 +1,6 @@
 package juego.controladores;
 
+import juego.util.Time;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
@@ -12,9 +13,13 @@ public class Window {
     private int width, height;
     private String title;
     private long glfwWindow;
-    int i= 0;
+
+    public float r,g,b,a;
+
 
     private static Window window = null;
+
+    private static Scene currentScene;
 
     private Window(){
         this.width = 1920;
@@ -22,6 +27,20 @@ public class Window {
         this.title = "Mario";
     }
 
+    public static void changeScene(int newScene){
+        switch (newScene){
+            case 0:
+                currentScene = new LevelEditorScene();
+                //currentScene.init();
+                break;
+            case 1:
+                currentScene = new LevelScene();
+                break;
+            default:
+                assert false : "Unknow scene '" +newScene + "'";
+                break;
+        }
+    }
 
     public static Window get() {
         if(Window.window == null){
@@ -37,16 +56,28 @@ public class Window {
     }
 
     private void loop() {
+
+        float beginTime = Time.getTime();
+        float endTime = Time.getTime();
+        float dt = -1.0f;
+
         while(!glfwWindowShouldClose(glfwWindow)){
             //pool events
             glfwPollEvents();
 
             //color rojo: 1.0f,0.0f,0.0f,1.0f
-            glClearColor(1.0f,0.0f,0.0f,1.0f);
+            glClearColor(r,g,b,a);
             glClear(GL_COLOR_BUFFER_BIT);
 
+            if (dt >=0){
+                currentScene.update(dt);
+            }
 
             glfwSwapBuffers(glfwWindow);
+
+            endTime = Time.getTime();
+            dt = endTime - beginTime;
+            beginTime = endTime;
 
 //            //liberar la memoria
 //            glfwFreeCallbacks(glfwWindow);
@@ -101,6 +132,7 @@ public class Window {
          de GLCApabilities y permite el uso de bindings de OpenGL.*/
         GL.createCapabilities();
 
+        Window.changeScene(0);
     }
 
 }
